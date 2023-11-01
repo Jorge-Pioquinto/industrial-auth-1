@@ -20,7 +20,7 @@
   </div>
 
   <%= image_tag photo.image, class: "img-fluid" %>
-
+  
   <div class="card-body">
     <p class="card-text"><%= photo.caption %></p>
   </div>
@@ -30,7 +30,7 @@
       <%= render "comments/comment", comment: comment %>
     <% end %>
   </ul>
-
+  
   <div class="card-body">
     <%= render "comments/form", comment: photo.comments.build %>
   </div>
