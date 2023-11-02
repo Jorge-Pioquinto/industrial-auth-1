@@ -1,11 +1,9 @@
 class PhotosController < ApplicationController
   before_action :set_photo, only: %i[ show edit update destroy ]
-  before_action :ensure_current_user_is_owner, only: [:destroy, :update, :edit]
-  before_action :ensure_user_is_authorized, only: [:show]
-  
+
   # GET /photos or /photos.json
   def index
-    @photos = Photo.all
+    authorize @photos = Photo.all
   end
 
   # GET /photos/1 or /photos/1.json
@@ -15,16 +13,17 @@ class PhotosController < ApplicationController
 
   # GET /photos/new
   def new
-    @photo = Photo.new
+    authorize @photo = Photo.new
   end
 
   # GET /photos/1/edit
   def edit
+    authorize @photo
   end
 
   # POST /photos or /photos.json
   def create
-    @photo = Photo.new(photo_params)
+    authorize @photo = Photo.new(photo_params)
     @photo.owner = current_user
 
     respond_to do |format|
@@ -40,6 +39,7 @@ class PhotosController < ApplicationController
 
   # PATCH/PUT /photos/1 or /photos/1.json
   def update
+    authorize @photo
     respond_to do |format|
       if @photo.update(photo_params)
         format.html { redirect_to @photo, notice: "Photo was successfully updated." }
@@ -53,11 +53,12 @@ class PhotosController < ApplicationController
 
   # DELETE /photos/1 or /photos/1.json
   def destroy
-          @photo.destroy
-      respond_to do |format|
-        format.html { redirect_back fallback_location: root_url, notice: "Photo was successfully destroyed." }
-        format.json { head :no_content }
-          end
+    authorize @photo
+    @photo.destroy
+    respond_to do |format|
+      format.html { redirect_back fallback_location: root_url, notice: "Photo was successfully destroyed." }
+      format.json { head :no_content }
+    end
   end
 
   private
@@ -67,20 +68,9 @@ class PhotosController < ApplicationController
     @photo = Photo.find(params[:id])
   end
 
-  def ensure_current_user_is_owner
-    if current_user != @photo.owner
-      redirect_back fallback_location: root_url, alert: "You're not authorized for that."
-    end
-  end
-
-  def ensure_user_is_authorized
-    if !PhotoPolicy.new(current_user, @photo).show?
-      raise Pundit::NotAuthorizedError, "not allowed"
-    end
-  end
-
   # Only allow a list of trusted parameters through.
   def photo_params
     params.require(:photo).permit(:image, :comments_count, :likes_count, :caption, :owner_id)
   end
+
 end

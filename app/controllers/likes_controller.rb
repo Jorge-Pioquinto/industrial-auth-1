@@ -3,25 +3,27 @@ class LikesController < ApplicationController
 
   # GET /likes or /likes.json
   def index
-    @likes = Like.all
+    authorize @likes = Like.all
   end
 
   # GET /likes/1 or /likes/1.json
   def show
+    authorize @like
   end
 
   # GET /likes/new
   def new
-    @like = Like.new
+    authorize @like = Like.new
   end
 
   # GET /likes/1/edit
   def edit
+    authorize @like
   end
 
   # POST /likes or /likes.json
   def create
-    @like = Like.new(like_params)
+    authorize @like = Like.new(like_params)
 
     respond_to do |format|
       if @like.save
